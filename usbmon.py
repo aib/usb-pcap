@@ -1,6 +1,6 @@
 import collections
 
-import util
+from . import util
 
 UsbmonPacket = collections.namedtuple('UsbmonPacket',
 	('id', 'type', 'xfer_type', 'epnum', 'devnum', 'busnum', 'flag_setup', 'flag_data', 'ts_sec', 'ts_usec', 'status', 'length', 'len_cap', 'setup', 'error_count', 'numdesc', 'interval', 'start_frame', 'xfer_flags', 'ndesc', 'data'),
