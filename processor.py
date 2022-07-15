@@ -1,4 +1,5 @@
 import collections
+import struct
 
 EVENT_SUBMISSION = ord('S')
 EVENT_CALLBACK = ord('C')
@@ -17,6 +18,8 @@ TRANSFER_TYPE_STRINGS = {
 	TRANSFER_TYPE_BULK: "bulk"
 }
 
+UsbSetupPacket = collections.namedtuple('UsbSetupPacket', ('bmRequestType', 'bRequest', 'wValue', 'wIndex', 'wLength'))
+
 class PacketProcessorException(Exception): pass
 
 class UnknownPacketTypeException(PacketProcessorException):
@@ -32,7 +35,7 @@ class MismatchedRequestAndResponseException(PacketProcessorException):
 		super().__init__(f"Request and response mismatched in field \"{field_name}\"")
 
 class CompletedRequest:
-	def __init__(self, request_packet, response_packet, bus, device, endpoint, transfer_type, dir_in, data):
+	def __init__(self, request_packet, response_packet, bus, device, endpoint, transfer_type, dir_in, setup, data):
 		self.request_packet = request_packet
 		self.response_packet = response_packet
 		self.bus = bus
@@ -40,13 +43,18 @@ class CompletedRequest:
 		self.endpoint = endpoint
 		self.transfer_type = transfer_type
 		self.dir_in = dir_in
+		self.setup = setup
 		self.data = data
 
 		self.dir_str = "in" if self.dir_in else "out"
 		self.transfer_type_str = TRANSFER_TYPE_STRINGS.get(transfer_type, TRANSFER_TYPE_STRINGS[None])
 
 	def __str__(self):
-		return f"CompletedRequest<{self.bus}.{self.device}.{self.endpoint} {self.transfer_type_str} {self.dir_str} {len(self.data)}>"
+		if self.setup is None:
+			setup_str = ""
+		else:
+			setup_str = f"{self.setup.bmRequestType:02x}:{self.setup.bRequest:02x}:{self.setup.wValue:04x}:{self.setup.wIndex:04x} "
+		return f"CompletedRequest<{self.bus}.{self.device}.{self.endpoint} {self.transfer_type_str} {self.dir_str} {setup_str}{len(self.data)}>"
 
 class PacketProcessor:
 	def __init__(self):
@@ -104,4 +112,10 @@ class PacketProcessor:
 
 			data = request.data
 
-		return CompletedRequest(request, response, busnum, devnum, epnum, xfer_type, dir_in, data)
+		if xfer_type == TRANSFER_TYPE_CONTROL:
+			setup_fields = struct.unpack('<BBHHH', request.setup)
+			setup = UsbSetupPacket(*setup_fields)
+		else:
+			setup = None
+
+		return CompletedRequest(request, response, busnum, devnum, epnum, xfer_type, dir_in, setup, data)
