@@ -4,12 +4,17 @@ EVENT_SUBMISSION = ord('S')
 EVENT_CALLBACK = ord('C')
 EVENT_SUBMISSION_ERROR = ord('E')
 
+TRANSFER_TYPE_ISOCHRONOUS = 0
+TRANSFER_TYPE_INTERRUPT = 1
+TRANSFER_TYPE_CONTROL = 2
+TRANSFER_TYPE_BULK = 3
+
 TRANSFER_TYPE_STRINGS = {
 	None: "(unknown)",
-	0: "isochronous",
-	1: "interrupt",
-	2: "control",
-	3: "bulk"
+	TRANSFER_TYPE_ISOCHRONOUS: "isochronous",
+	TRANSFER_TYPE_INTERRUPT: "interrupt",
+	TRANSFER_TYPE_CONTROL: "control",
+	TRANSFER_TYPE_BULK: "bulk"
 }
 
 class PacketProcessorException(Exception): pass
