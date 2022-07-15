@@ -27,8 +27,6 @@ class UnknownPacketTypeException(PacketProcessorException):
 		self.packet_type = packet_type
 		super().__init__(f"Unsupported packet type \"{packet_type}\"")
 
-class ExtraneousDataException(PacketProcessorException): pass
-
 class MismatchedRequestAndResponseException(PacketProcessorException):
 	def __init__(self, field_name):
 		self.field_name = field_name
@@ -102,14 +100,8 @@ class PacketProcessor:
 		epnum = epnum_field & 0x7f
 
 		if dir_in:
-			if len(request.data) != 0:
-				raise ExtraneousDataException("Found data in IN request packet")
-
 			data = response.data
 		else:
-			if len(response.data) != 0:
-				raise ExtraneousDataException("Found data in OUT response packet")
-
 			data = request.data
 
 		if xfer_type == TRANSFER_TYPE_CONTROL:
