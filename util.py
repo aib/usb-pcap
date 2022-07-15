@@ -23,6 +23,15 @@ class Struct:
 	def get_full_format(self, format):
 		return self.format_first_char + format
 
+def get_hexdump_row(rowbytes, bytes_per_row=0):
+	hexs = " ".join(["%02x" % (b,) for b in rowbytes])
+	chrs = "".join([chr(b) if chr(b).isprintable() else "." for b in rowbytes])
+	if bytes_per_row == 0:
+		pad = "  "
+	else:
+		pad = " " * (3 * bytes_per_row - len(hexs)) + " "
+	return hexs + pad + chrs
+
 def get_hexdump(bytes_, bytes_per_row=16, addr_len=4):
 	out = ""
 
@@ -33,16 +42,12 @@ def get_hexdump(bytes_, bytes_per_row=16, addr_len=4):
 	for row in range(len(bytes_) // bytes_per_row + 1):
 		addr = row * bytes_per_row
 		rowbytes = bytes_[addr:addr+bytes_per_row]
-
 		if addr_len > 0:
 			adrs = f"%0{addr_len}x: " % (addr,)
 		else:
 			adrs = ""
 
-		hexs = " ".join(["%02x" % (b,) for b in rowbytes])
-		chrs = "".join([chr(b) if chr(b).isprintable() else "." for b in rowbytes])
-		pad = " " * (3 * bytes_per_row - len(hexs))
-		out += ("\n" if out else "") + f"{adrs}{hexs}{pad} {chrs}"
+		out += ("\n" if out else "") + adrs + get_hexdump_row(rowbytes, bytes_per_row)
 
 	return out
 
