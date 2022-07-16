@@ -1,6 +1,8 @@
 import collections
 import struct
 
+from . import usbmon
+
 EVENT_SUBMISSION = ord('S')
 EVENT_CALLBACK = ord('C')
 EVENT_SUBMISSION_ERROR = ord('E')
@@ -18,8 +20,6 @@ TRANSFER_TYPE_STRINGS = {
 	TRANSFER_TYPE_BULK: "bulk"
 }
 
-UsbSetupPacket = collections.namedtuple('UsbSetupPacket', ('bmRequestType', 'bRequest', 'wValue', 'wIndex', 'wLength'))
-
 class PacketProcessorException(Exception): pass
 
 class UnknownPacketTypeException(PacketProcessorException):
@@ -32,8 +32,26 @@ class MismatchedRequestAndResponseException(PacketProcessorException):
 		self.field_name = field_name
 		super().__init__(f"Request and response mismatched in field \"{field_name}\"")
 
+UsbSetupPacket = collections.namedtuple('UsbSetupPacket', ('bmRequestType', 'bRequest', 'wValue', 'wIndex', 'wLength'))
+
+class IsoPacket:
+	def __init__(self, status, data):
+		self.status = status
+		self.data = data
+
+	def __str__(self):
+		return f"IsoPacket<status {self.status}, data {len(self.data)} bytes>"
+
+class IsoTransfer:
+	def __init__(self, packets):
+		self.packets = packets
+		self.good_packets = [p for p in packets if p.status == 0]
+
+	def __str__(self):
+		return f"IsoTransfer<{len(self.good_packets)}/{len(self.packets)} packets>"
+
 class CompletedRequest:
-	def __init__(self, request_packet, response_packet, bus, device, endpoint, transfer_type, dir_in, setup, data):
+	def __init__(self, request_packet, response_packet, bus, device, endpoint, transfer_type, dir_in, setup, iso, data):
 		self.request_packet = request_packet
 		self.response_packet = response_packet
 		self.bus = bus
@@ -42,6 +60,7 @@ class CompletedRequest:
 		self.transfer_type = transfer_type
 		self.dir_in = dir_in
 		self.setup = setup
+		self.iso = iso
 		self.data = data
 
 		self.dir_str = "in" if self.dir_in else "out"
@@ -100,9 +119,9 @@ class PacketProcessor:
 		epnum = epnum_field & 0x7f
 
 		if dir_in:
-			data = response.data
+			data_packet = response
 		else:
-			data = request.data
+			data_packet = request
 
 		if xfer_type == TRANSFER_TYPE_CONTROL:
 			setup_fields = struct.unpack('<BBHHH', request.setup)
@@ -110,4 +129,16 @@ class PacketProcessor:
 		else:
 			setup = None
 
-		return CompletedRequest(request, response, busnum, devnum, epnum, xfer_type, dir_in, setup, data)
+		if xfer_type == TRANSFER_TYPE_ISOCHRONOUS:
+			packets = []
+
+			descriptors, data_offset = usbmon.parse_iso_descriptors(data_packet.ndesc, data_packet.data)
+			for d in descriptors:
+				packet = IsoPacket(d.iso_status, data_packet.data[data_offset+d.iso_off:data_offset+d.iso_off+d.iso_len])
+				packets.append(packet)
+
+			iso = IsoTransfer(packets)
+		else:
+			iso = None
+
+		return CompletedRequest(request, response, busnum, devnum, epnum, xfer_type, dir_in, setup, iso, data_packet.data)
