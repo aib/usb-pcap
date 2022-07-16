@@ -71,7 +71,7 @@ class CompletedRequest:
 			setup_str = ""
 		else:
 			setup_str = f"{self.setup.bmRequestType:02x}:{self.setup.bRequest:02x}:{self.setup.wValue:04x}:{self.setup.wIndex:04x} "
-		return f"CompletedRequest<{self.bus}.{self.device}.{self.endpoint} {self.transfer_type_str} {self.dir_str} {setup_str}{len(self.data)}>"
+		return f"CompletedRequest<{self.bus}.{self.device}.{self.endpoint} {self.transfer_type_str} {self.dir_str} {setup_str}{len(self.data)} bytes>"
 
 class PacketProcessor:
 	def __init__(self):
