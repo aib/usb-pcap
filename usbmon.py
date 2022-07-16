@@ -5,6 +5,22 @@ from . import util
 UsbmonPacket = collections.namedtuple('UsbmonPacket',
 	('id', 'type', 'xfer_type', 'epnum', 'devnum', 'busnum', 'flag_setup', 'flag_data', 'ts_sec', 'ts_usec', 'status', 'length', 'len_cap', 'setup', 'error_count', 'numdesc', 'interval', 'start_frame', 'xfer_flags', 'ndesc', 'data'),
 )
+UsbmonIsoDescriptor = collections.namedtuple('UsbmonIsoDescriptor',
+	('iso_status', 'iso_off', 'iso_len')
+)
+
+def parse_iso_descriptors(count, usbmon_descriptor_bytes):
+	descriptors = []
+	ds = util.Struct(usbmon_descriptor_bytes, '=')
+
+	for n in range(count):
+		iso_status = ds.unpack_next('i')
+		iso_off = ds.unpack_next('I')
+		iso_len = ds.unpack_next('I')
+		_pad = ds.unpack_next('L')
+		descriptors.append(UsbmonIsoDescriptor(iso_status, iso_off, iso_len))
+
+	return (descriptors, ds.offset)
 
 def parse_usbmon_packet(usbmon_packet_bytes):
 	ps = util.Struct(usbmon_packet_bytes, '=')
