@@ -3,7 +3,7 @@ import collections
 from . import util
 
 UsbmonPacket = collections.namedtuple('UsbmonPacket',
-	('id', 'type', 'xfer_type', 'epnum', 'devnum', 'busnum', 'flag_setup', 'flag_data', 'ts_sec', 'ts_usec', 'status', 'length', 'len_cap', 'setup', 'error_count', 'numdesc', 'interval', 'start_frame', 'xfer_flags', 'ndesc', 'data'),
+	('number', 'id', 'type', 'xfer_type', 'epnum', 'devnum', 'busnum', 'flag_setup', 'flag_data', 'ts_sec', 'ts_usec', 'status', 'length', 'len_cap', 'setup', 'error_count', 'numdesc', 'interval', 'start_frame', 'xfer_flags', 'ndesc', 'data'),
 )
 UsbmonIsoDescriptor = collections.namedtuple('UsbmonIsoDescriptor',
 	('iso_status', 'iso_off', 'iso_len')
@@ -22,7 +22,7 @@ def parse_iso_descriptors(count, usbmon_descriptor_bytes):
 
 	return (descriptors, ds.offset)
 
-def parse_usbmon_packet(usbmon_packet_bytes):
+def parse_usbmon_packet(usbmon_packet_bytes, number=None):
 	ps = util.Struct(usbmon_packet_bytes, '=')
 
 	id = ps.unpack_next('Q')
@@ -50,4 +50,4 @@ def parse_usbmon_packet(usbmon_packet_bytes):
 
 	assert ps.offset == 64
 
-	return UsbmonPacket(id, type, xfer_type, epnum, devnum, busnum, flag_setup, flag_data, ts_sec, ts_usec, status, length, len_cap, setup, error_count, numdesc, interval, start_frame, xfer_flags, ndesc, usbmon_packet_bytes[ps.offset:])
+	return UsbmonPacket(number, id, type, xfer_type, epnum, devnum, busnum, flag_setup, flag_data, ts_sec, ts_usec, status, length, len_cap, setup, error_count, numdesc, interval, start_frame, xfer_flags, ndesc, usbmon_packet_bytes[ps.offset:])
