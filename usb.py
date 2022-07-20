@@ -10,6 +10,22 @@ SETUP_RECIPIENT_INTERFACE = 1
 SETUP_RECIPIENT_ENDPOINT = 2
 SETUP_RECIPIENT_OTHER = 3
 
+STANDARD_REQUESTS = {
+	0: "GET_STATUS",
+	1: "CLEAR_FEATURE",
+	#2: "Reserved for future use",
+	3: "SET_FEATURE",
+	#4: "Reserved for future use",
+	5: "SET_ADDRESS",
+	6: "GET_DESCRIPTOR",
+	7: "SET_DESCRIPTOR",
+	8: "GET_CONFIGURATION",
+	9: "SET_CONFIGURATION",
+	10: "GET_INTERFACE",
+	11: "SET_INTERFACE",
+	12: "SYNCH_FRAME",
+}
+
 class SetupPacket:
 	def __init__(self, bmRequestType, bRequest, wValue, wIndex, wLength):
 		self.bmRequestType = bmRequestType
@@ -38,6 +54,12 @@ class SetupPacket:
 
 	def get_requesttype_str(self):
 		return f"{self.type_str}/{self.recipient_str}/{self.direction_str}"
+
+	def get_standard_request_name(self):
+		if self.type == SETUP_TYPE_STANDARD:
+			return STANDARD_REQUESTS.get(self.bRequest, None)
+		else:
+			return None
 
 	def get_summary(self, requesttype_fields=False):
 		return f"{self.bmRequestType:02x}:{self.bRequest:02x}:{self.wValue:04x}:{self.wIndex:04x}"
