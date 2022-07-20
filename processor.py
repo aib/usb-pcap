@@ -65,7 +65,12 @@ class CompletedRequest:
 		self.transfer_type_str = TRANSFER_TYPE_STRINGS.get(transfer_type, TRANSFER_TYPE_STRINGS[None])
 
 	def __str__(self):
-		setup_str = f"{self.setup.get_requesttype_str()} {self.setup.get_summary()} " if self.setup is not None else ""
+		if self.setup is not None:
+			srn = self.setup.get_standard_request_name()
+			setup_str = f"{srn if srn is not None else self.setup.type_str}/{self.setup.recipient_str}/{self.setup.direction_str} {self.setup.get_summary()} "
+		else:
+			setup_str = ""
+
 		return f"CompletedRequest<{self.bus}.{self.device}.{self.endpoint} {self.transfer_type_str} {self.dir_str} {setup_str}{len(self.data)} bytes>"
 
 class PacketProcessor:

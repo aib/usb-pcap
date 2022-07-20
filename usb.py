@@ -52,9 +52,6 @@ class SetupPacket:
 			"other"     if self.recipient == SETUP_RECIPIENT_OTHER else \
 			"reserved"
 
-	def get_requesttype_str(self):
-		return f"{self.type_str}/{self.recipient_str}/{self.direction_str}"
-
 	def get_standard_request_name(self):
 		if self.type == SETUP_TYPE_STANDARD:
 			return STANDARD_REQUESTS.get(self.bRequest, None)
