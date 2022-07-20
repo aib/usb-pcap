@@ -1,3 +1,15 @@
+SETUP_DIRECTION_OUT = 0
+SETUP_DIRECTION_IN = 1
+
+SETUP_TYPE_STANDARD = 0
+SETUP_TYPE_CLASS = 1
+SETUP_TYPE_VENDOR = 2
+
+SETUP_RECIPIENT_DEVICE = 0
+SETUP_RECIPIENT_INTERFACE = 1
+SETUP_RECIPIENT_ENDPOINT = 2
+SETUP_RECIPIENT_OTHER = 3
+
 class SetupPacket:
 	def __init__(self, bmRequestType, bRequest, wValue, wIndex, wLength):
 		self.bmRequestType = bmRequestType
@@ -7,21 +19,21 @@ class SetupPacket:
 		self.wLength = wLength
 
 		self.direction = (self.bmRequestType & 0x80) >> 7
-		self.direction_str = "out" if self.direction == 0 else "in"
+		self.direction_str = "out" if self.direction == SETUP_DIRECTION_OUT else "in"
 
 		self.type = (self.bmRequestType & 0x60) >> 5
 		self.type_str = \
-			"standard" if self.type == 0 else \
-			"class"    if self.type == 1 else \
-			"vendor"   if self.type == 2 else \
+			"standard" if self.type == SETUP_TYPE_STANDARD else \
+			"class"    if self.type == SETUP_TYPE_CLASS else \
+			"vendor"   if self.type == SETUP_TYPE_VENDOR else \
 			"reserved"
 
 		self.recipient = (self.bmRequestType & 0x1f) >> 0
 		self.recipient_str = \
-			"device"    if self.recipient == 0 else \
-			"interface" if self.recipient == 1 else \
-			"endpoint"  if self.recipient == 2 else \
-			"other"     if self.recipient == 3 else \
+			"device"    if self.recipient == SETUP_RECIPIENT_DEVICE else \
+			"interface" if self.recipient == SETUP_RECIPIENT_INTERFACE else \
+			"endpoint"  if self.recipient == SETUP_RECIPIENT_ENDPOINT else \
+			"other"     if self.recipient == SETUP_RECIPIENT_OTHER else \
 			"reserved"
 
 	def get_requesttype_str(self):
