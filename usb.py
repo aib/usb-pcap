@@ -6,17 +6,22 @@ class SetupPacket:
 		self.wIndex = wIndex
 		self.wLength = wLength
 
-		self.direction_str = "out" if self.bmRequestType & 0x80 == 0x00 else "in"
+		self.direction = (self.bmRequestType & 0x80) >> 7
+		self.direction_str = "out" if self.direction == 0 else "in"
+
+		self.type = (self.bmRequestType & 0x60) >> 5
 		self.type_str = \
-			"standard" if self.bmRequestType & 0x60 == 0x00 else \
-			"class"    if self.bmRequestType & 0x60 == 0x20 else \
-			"vendor"   if self.bmRequestType & 0x60 == 0x40 else \
+			"standard" if self.type == 0 else \
+			"class"    if self.type == 1 else \
+			"vendor"   if self.type == 2 else \
 			"reserved"
+
+		self.recipient = (self.bmRequestType & 0x1f) >> 0
 		self.recipient_str = \
-			"device"    if self.bmRequestType & 0x1f == 0x00 else \
-			"interface" if self.bmRequestType & 0x1f == 0x01 else \
-			"endpoint"  if self.bmRequestType & 0x1f == 0x02 else \
-			"other"     if self.bmRequestType & 0x1f == 0x03 else \
+			"device"    if self.recipient == 0 else \
+			"interface" if self.recipient == 1 else \
+			"endpoint"  if self.recipient == 2 else \
+			"other"     if self.recipient == 3 else \
 			"reserved"
 
 	def get_requesttype_str(self):
