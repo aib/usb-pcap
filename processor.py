@@ -49,7 +49,7 @@ class IsoTransfer:
 		return f"IsoTransfer<{len(self.good_packets)}/{len(self.packets)} packets>"
 
 class CompletedRequest:
-	def __init__(self, request_packet, response_packet, bus, device, endpoint, transfer_type, dir_in, setup, iso, data):
+	def __init__(self, request_packet, response_packet, bus, device, endpoint, transfer_type, dir_in, setup, iso, data, data_length):
 		self.request_packet = request_packet
 		self.response_packet = response_packet
 		self.bus = bus
@@ -60,6 +60,7 @@ class CompletedRequest:
 		self.setup = setup
 		self.iso = iso
 		self.data = data
+		self.data_length = data_length
 
 		self.dir_str = "in" if self.dir_in else "out"
 		self.transfer_type_str = TRANSFER_TYPE_STRINGS.get(transfer_type, TRANSFER_TYPE_STRINGS[None])
@@ -71,7 +72,12 @@ class CompletedRequest:
 		else:
 			setup_str = ""
 
-		return f"CompletedRequest<{self.bus}.{self.device}.{self.endpoint} {self.transfer_type_str} {self.dir_str} {setup_str}{len(self.data)} bytes>"
+		if self.data_length != len(self.data):
+			len_str = f"{len(self.data)}/{self.data_length} (truncated) bytes"
+		else:
+			len_str = f"{self.data_length} bytes"
+
+		return f"CompletedRequest<{self.bus}.{self.device}.{self.endpoint} {self.transfer_type_str} {self.dir_str} {setup_str}{len_str}>"
 
 class PacketProcessor:
 	def __init__(self):
@@ -141,4 +147,4 @@ class PacketProcessor:
 		else:
 			iso = None
 
-		return CompletedRequest(request, response, busnum, devnum, epnum, xfer_type, dir_in, setup, iso, data_packet.data)
+		return CompletedRequest(request, response, busnum, devnum, epnum, xfer_type, dir_in, setup, iso, data_packet.data, data_packet.length)
