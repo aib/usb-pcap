@@ -7,19 +7,6 @@ EVENT_SUBMISSION = ord('S')
 EVENT_CALLBACK = ord('C')
 EVENT_SUBMISSION_ERROR = ord('E')
 
-TRANSFER_TYPE_ISOCHRONOUS = 0
-TRANSFER_TYPE_INTERRUPT = 1
-TRANSFER_TYPE_CONTROL = 2
-TRANSFER_TYPE_BULK = 3
-
-TRANSFER_TYPE_STRINGS = {
-	None: "(unknown)",
-	TRANSFER_TYPE_ISOCHRONOUS: "isochronous",
-	TRANSFER_TYPE_INTERRUPT: "interrupt",
-	TRANSFER_TYPE_CONTROL: "control",
-	TRANSFER_TYPE_BULK: "bulk"
-}
-
 class PacketProcessorException(Exception): pass
 
 class UnknownPacketTypeException(PacketProcessorException):
@@ -63,7 +50,7 @@ class CompletedRequest:
 		self.data_length = data_length
 
 		self.dir_str = "in" if self.dir_in else "out"
-		self.transfer_type_str = TRANSFER_TYPE_STRINGS.get(transfer_type, TRANSFER_TYPE_STRINGS[None])
+		self.transfer_type_str = usb.TRANSFER_TYPE_STRINGS.get(transfer_type, usb.TRANSFER_TYPE_STRINGS[None])
 
 	def __str__(self):
 		if self.setup is not None:
@@ -129,13 +116,13 @@ class PacketProcessor:
 		else:
 			data_packet = request
 
-		if xfer_type == TRANSFER_TYPE_CONTROL:
+		if xfer_type == usb.TRANSFER_TYPE_CONTROL:
 			setup_fields = struct.unpack('<BBHHH', request.setup)
 			setup = usb.SetupPacket(*setup_fields)
 		else:
 			setup = None
 
-		if xfer_type == TRANSFER_TYPE_ISOCHRONOUS:
+		if xfer_type == usb.TRANSFER_TYPE_ISOCHRONOUS:
 			packets = []
 
 			descriptors, data_offset = usbmon.parse_iso_descriptors(data_packet.ndesc, data_packet.data)

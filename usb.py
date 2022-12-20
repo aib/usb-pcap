@@ -26,6 +26,19 @@ STANDARD_REQUESTS = {
 	12: "SYNCH_FRAME",
 }
 
+TRANSFER_TYPE_ISOCHRONOUS = 0
+TRANSFER_TYPE_INTERRUPT = 1
+TRANSFER_TYPE_CONTROL = 2
+TRANSFER_TYPE_BULK = 3
+
+TRANSFER_TYPE_STRINGS = {
+	None: "(unknown)",
+	TRANSFER_TYPE_ISOCHRONOUS: "isochronous",
+	TRANSFER_TYPE_INTERRUPT: "interrupt",
+	TRANSFER_TYPE_CONTROL: "control",
+	TRANSFER_TYPE_BULK: "bulk"
+}
+
 class SetupPacket:
 	def __init__(self, bmRequestType, bRequest, wValue, wIndex, wLength):
 		self.bmRequestType = bmRequestType
