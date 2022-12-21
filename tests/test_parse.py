@@ -1,8 +1,3 @@
-import os
-import sys
-sys.path.append(os.path.join(os.getcwd(), '..')) # FIXME
-import usb_pcap
-
 import unittest
 import traceback
 
