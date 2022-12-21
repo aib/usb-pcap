@@ -1,10 +1,30 @@
 import collections
 
-from . import util
+from . import packet, util
 
-UsbmonPacket = collections.namedtuple('UsbmonPacket',
-	('number', 'id', 'type', 'xfer_type', 'epnum', 'devnum', 'busnum', 'flag_setup', 'flag_data', 'ts_sec', 'ts_usec', 'status', 'length', 'len_cap', 'setup', 'error_count', 'numdesc', 'interval', 'start_frame', 'xfer_flags', 'ndesc', 'data'),
-)
+class UsbmonPacket(packet.CapturedPacket):
+	def __init__(self, number, id, type, xfer_type, epnum, devnum, busnum, flag_setup, flag_data, ts_sec, ts_usec, status, length, len_cap, setup, error_count, numdesc, interval, start_frame, xfer_flags, ndesc, data):
+		super().__init__(number, id, type, xfer_type, epnum, devnum, busnum, setup, length, data)
+
+		self.flag_setup = flag_setup
+		self.flag_data = flag_data
+		self.ts_sec = ts_sec
+		self.ts_usec = ts_usec
+		self.status = status
+		self.len_cap = len_cap
+		self.error_count = error_count
+		self.numdesc = numdesc
+		self.interval = interval
+		self.start_frame = start_frame
+		self.xfer_flags = xfer_flags
+		self.ndesc = ndesc
+
+	def __repr__(self):
+		return f"UsbmonPacket({', '.join([(k + '=' + repr(v)) for k, v in self.__dict__.items()])})"
+
+	def __str__(self):
+		return f"UsbmonPacket({', '.join([(k + '=' + str(v)) for k, v in self.__dict__.items()])})"
+
 UsbmonIsoDescriptor = collections.namedtuple('UsbmonIsoDescriptor',
 	('iso_status', 'iso_off', 'iso_len')
 )

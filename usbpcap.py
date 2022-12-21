@@ -1,22 +1,13 @@
-from . import usb, util
+from . import packet, usb, util
 
-class UsbpcapPacket:
+class UsbpcapPacket(packet.CapturedPacket):
 	def __init__(self, number, header_len, irp_id, irp_status, urb_func, irp_info, bus, device, endpoint, transfer, data_length, stage, setup_data, data):
 		if irp_info & 0x01:
 			type_ = ord('C')
 		else:
 			type_ = ord('S')
 
-		self.number = number
-		self.id = irp_id
-		self.type = type_
-		self.xfer_type = transfer
-		self.epnum = endpoint
-		self.devnum = device
-		self.busnum = bus
-		self.setup = setup_data
-		self.length = data_length
-		self.data = data
+		super().__init__(number, irp_id, type_, transfer, endpoint, device, bus, setup_data, data_length, data)
 
 	def __repr__(self):
 		return f"UsbpcapPacket({', '.join([(k + '=' + repr(v)) for k, v in self.__dict__.items()])})"
