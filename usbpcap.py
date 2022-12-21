@@ -9,6 +9,12 @@ class UsbpcapPacket(packet.CapturedPacket):
 
 		super().__init__(number, irp_id, type_, transfer, endpoint, device, bus, setup_data, data_length, data)
 
+		self.header_len = header_len
+		self.irp_id = irp_id
+		self.irp_status = irp_status
+		self.urb_func = urb_func
+		self.irp_info = irp_info
+
 	def __repr__(self):
 		return f"UsbpcapPacket({', '.join([(k + '=' + repr(v)) for k, v in self.__dict__.items()])})"
 
